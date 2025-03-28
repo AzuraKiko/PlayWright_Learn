@@ -1,0 +1,3 @@
+Setup: Mở trình duyệt undefined và vào trang https://portal-tradeforgood-dev2.equix.app/
+Actual page title: Trade For Good Admin Portal
+Giữ trình duyệt mở. Nhấn Ctrl+C để kết thúc.
