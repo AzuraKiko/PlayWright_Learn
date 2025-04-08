@@ -1,130 +1,110 @@
-import { test, expect } from '../../lib/core/BaseTest';
+import { test, expect } from '@playwright/test';
 import { TestData } from '../../lib/constants/TestData';
+import PageFactory from '../../lib/pages/PageFactory';
+import config from '../../config/playwright.config.js';
 
-test('Check title of Trade for Good', async ({ baseTest }) => {
-    const { page } = baseTest;  // Lấy page từ baseTest
+test.describe('Login Functionality', () => {
+    let loginPage;
+    let pageFactory;
 
-    // Log the actual title of the page
-    const actualTitle = await page.title();
-    console.log('Actual page title:', actualTitle);
+    test.beforeEach(async ({ page },) => {
+        // Access the baseURL directly from the config
+        const baseURL = config.use?.baseURL;
 
-    // Kiểm tra tiêu đề trang
-    await expect(page).toHaveTitle(/Trade For Good Admin Portal/);
+        pageFactory = new PageFactory(page);
+        // Lấy LoginPage từ PageFactory
+        loginPage = pageFactory.getLoginPage();
+        await loginPage.open(baseURL);
+    });
 
-    // await page.waitForTimeout(60000); // Chờ 1 phút
+    // Teardown after each test
+    test.afterEach(async () => {
+        await page.close();
+    });
+
+    test('should login successfully with valid credentials', async ({ page }) => {
+        await loginPage.login(TestData.Users.ValidUser.email, TestData.Users.ValidUser.password);
+
+        // Kiểm tra đã chuyển hướng đến trang nhập PIN
+        await expect(page.locator('body')).toContainText('Enter Pin Code');
+
+        await loginPage.enterCode(TestData.Users.ValidUser.code);
+
+        await expect(page.locator('body')).toContainText('Dashboard');
+    });
+
+    test('should show error message with invalid credentials', async ({ page }) => {
+        await loginPage.login(TestData.Users.InvalidUser.email, TestData.Users.InvalidUser.password);
+
+        // Kiểm tra toast thông báo lỗi hiển thị
+        expect(await loginPage.isToastDisplayed()).toBeTruthy();
+
+        // Kiểm tra nội dung của toast message
+        expect(await loginPage.isToastMessageCorrect('Error, Incorrect Password or User Login. Please make sure your details are correct and try again')).toBeTruthy();
+
+        await loginPage.dismissToast();
+
+        expect(await loginPage.isToastGone()).toBeTruthy();
+
+        await loginPage.clickLoginButton();
+
+        expect(await loginPage.isToastDisplayed()).toBeTruthy();
+
+        expect(await loginPage.isToastMessageCorrect('Error, You have tried too many times. Please try again later.')).toBeTruthy();
+
+        await loginPage.dismissToast();
+
+        // Kiểm tra nội dung toast message đã bị xóa
+        expect(await loginPage.isToastGone()).toBeTruthy();
+    });
+
+    test('login button should be disabled when both email and password are empty', async ({ page }) => {
+        // Verify login button is disabled
+        expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+    });
+
+
+    test('login button should be disabled when email is empty', async ({ page }) => {
+        // Enter only password
+        await loginPage.enterPassword(TestData.Users.ValidUser.password);
+
+        // Verify login button is still disabled
+        expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+
+        await loginPage.focusEmailField();
+
+        await loginPage.blurEmailField();
+
+        // Verify error message for email is displayed (if your form shows errors before submission)
+        expect(await loginPage.isErrorMessageDisplayed('Email is required')).toBeTruthy();
+    });
+
+    test('login button should be disabled when password is empty', async ({ page }) => {
+        // Enter only email
+        await loginPage.enterEmail(TestData.Users.ValidUser.email);
+
+        // Verify login button is still disabled
+        expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+
+        await loginPage.focusPasswordField();
+
+        await loginPage.blurPasswordField();
+
+        // Verify error message for password is displayed (if your form shows errors before submission)
+        expect(await loginPage.isErrorMessageDisplayed('Password is required')).toBeTruthy();
+    });
+
+    test('login button should be disabled when email format is invalid', async ({ page }) => {
+        // Enter invalid email format and valid password
+        await loginPage.enterEmail((TestData.Users.InvalidUser.invalidFormatEmail));
+        await loginPage.enterPassword(TestData.Users.ValidUser.password);
+
+        // Verify login button is disabled
+        expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+
+        // Verify error message for invalid email is displayed
+        expect(await loginPage.isErrorMessageDisplayed('Email is invalid')).toBeTruthy();
+    });
 
 });
 
-test.describe('Kiểm tra chức năng đăng nhập', () => {
-    test('Đăng nhập thành công với tài khoản hợp lệ', async ({ baseTest }) => {
-        const { page, pageFactory } = baseTest;
-
-        // Lấy LoginPage từ PageFactory
-        const loginPage = pageFactory.getPage('login');
-
-        // Đăng nhập với tài khoản hợp lệ
-        await loginPage.login(
-            TestData.Users.StandardUser.username,
-            TestData.Users.StandardUser.password
-        );
-
-        // Lấy DashboardPage từ PageFactory
-        const dashboardPage = pageFactory.getPage('dashboard');
-
-        // Kiểm tra đã chuyển đến trang dashboard
-        expect(page.url()).toContain(UrlConstants.DASHBOARD);
-
-        // Kiểm tra trang dashboard đã được tải
-        expect(await dashboardPage.isLoaded()).toBeTruthy();
-
-        // Kiểm tra thông báo chào mừng
-        const welcomeMessage = await dashboardPage.getWelcomeMessage();
-        expect(welcomeMessage).toContain(TestData.Users.StandardUser.username);
-    });
-
-    test('Đăng nhập thất bại với tài khoản không hợp lệ', async ({ baseTest }) => {
-        const { pageFactory } = baseTest;
-
-        // Lấy LoginPage từ PageFactory
-        const loginPage = pageFactory.getPage('login');
-
-        // Đăng nhập với tài khoản không hợp lệ
-        await loginPage.login(
-            TestData.Users.InvalidUser.username,
-            TestData.Users.InvalidUser.password
-        );
-
-        // Kiểm tra thông báo lỗi hiển thị
-        expect(await loginPage.isErrorMessageVisible()).toBeTruthy();
-
-        // Kiểm tra nội dung thông báo lỗi
-        const errorMessage = await loginPage.getErrorMessage();
-        expect(errorMessage).toContain(TestData.ErrorMessages.InvalidCredentials);
-    });
-
-    test('Đăng nhập thất bại khi không nhập tên đăng nhập', async ({ baseTest }) => {
-        const { pageFactory } = baseTest;
-
-        // Lấy LoginPage từ PageFactory
-        const loginPage = pageFactory.getPage('login');
-
-        // Đăng nhập với tên đăng nhập trống
-        await loginPage.login('', TestData.Users.StandardUser.password);
-
-        // Kiểm tra thông báo lỗi hiển thị
-        expect(await loginPage.isErrorMessageVisible()).toBeTruthy();
-
-        // Kiểm tra nội dung thông báo lỗi
-        const errorMessage = await loginPage.getErrorMessage();
-        expect(errorMessage).toContain(TestData.ErrorMessages.EmptyUsername);
-    });
-
-    test('Đăng nhập thất bại khi không nhập mật khẩu', async ({ baseTest }) => {
-        const { pageFactory } = baseTest;
-
-        // Lấy LoginPage từ PageFactory
-        const loginPage = pageFactory.getPage('login');
-
-        // Đăng nhập với mật khẩu trống
-        await loginPage.login(TestData.Users.StandardUser.username, '');
-
-        // Kiểm tra thông báo lỗi hiển thị
-        expect(await loginPage.isErrorMessageVisible()).toBeTruthy();
-
-        // Kiểm tra nội dung thông báo lỗi
-        const errorMessage = await loginPage.getErrorMessage();
-        expect(errorMessage).toContain(TestData.ErrorMessages.EmptyPassword);
-    });
-
-    test('Kiểm tra chức năng "Ghi nhớ đăng nhập"', async ({ baseTest }) => {
-        const { page, pageFactory } = baseTest;
-
-        // Lấy LoginPage từ PageFactory
-        const loginPage = pageFactory.getPage('login');
-
-        // Đánh dấu vào checkbox "Ghi nhớ đăng nhập"
-        await loginPage.setRememberMe(true);
-
-        // Đăng nhập với tài khoản hợp lệ
-        await loginPage.login(
-            TestData.Users.StandardUser.username,
-            TestData.Users.StandardUser.password
-        );
-
-        // Lấy DashboardPage từ PageFactory
-        const dashboardPage = pageFactory.getPage('dashboard');
-
-        // Kiểm tra đã chuyển đến trang dashboard
-        expect(page.url()).toContain(UrlConstants.DASHBOARD);
-
-        // Đăng xuất
-        await dashboardPage.logout();
-
-        // Kiểm tra đã quay lại trang đăng nhập
-        expect(page.url()).toContain(UrlConstants.LOGIN);
-
-        // Kiểm tra tên đăng nhập đã được điền sẵn
-        const username = await page.inputValue(Locators.Login.usernameInput);
-        expect(username).toBe(TestData.Users.StandardUser.username);
-    });
-});

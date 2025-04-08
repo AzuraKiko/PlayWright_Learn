@@ -1,0 +1,9 @@
+[2025-04-06T16:48:35.790Z] [ERROR] Lỗi khi kiểm tra element hiển thị: //div[@role="alert"]
+page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('//div[@role="alert"]') to be visible
+
+    at WaitHelper.waitForElementToBeVisible (E:\Playwright\lib\utils\WaitHelper.js:21:29)
+    at LoginPage.isElementVisible (E:\Playwright\lib\core\BasePage.js:85:35)
+    at LoginPage.isToastDisplayed (E:\Playwright\lib\pages\LoginPage.js:68:27)
+    at E:\Playwright\tests\login\Login.spec.js:40:32

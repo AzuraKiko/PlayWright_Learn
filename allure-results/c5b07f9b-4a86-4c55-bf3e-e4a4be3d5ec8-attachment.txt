@@ -1,0 +1,9 @@
+[2025-04-06T18:39:56.874Z] [ERROR] Lỗi khi kiểm tra element disabled: button[type="submit"]
+page.waitForSelector: Target page, context or browser has been closed
+Call log:
+  - waiting for locator('button[type="submit"]') to be visible
+
+    at WaitHelper.waitForElementToBeVisible (E:\Playwright\lib\utils\WaitHelper.js:27:29)
+    at LoginPage.isElementDisabled (E:\Playwright\lib\core\BasePage.js:140:35)
+    at LoginPage.isLoginButtonDisabled (E:\Playwright\lib\pages\LoginPage.js:54:27)
+    at E:\Playwright\tests\login\Login.spec.js:23:32

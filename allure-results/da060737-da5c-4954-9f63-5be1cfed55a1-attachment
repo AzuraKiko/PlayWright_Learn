@@ -1,0 +1,161 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Login Functionality >> should login successfully with valid credentials
+- Location: E:\Playwright\tests\login\Login.spec.js:17:5
+
+# Error details
+
+```
+Error: expect(received).toBeFalsy()
+
+Received: true
+    at E:\Playwright\tests\login\Login.spec.js:23:57
+```
+
+# Page snapshot
+
+```yaml
+- main:
+  - heading "Trade for Good" [level=3]
+  - paragraph: Financial Companies Empowered Through Technology
+  - button "Read more":
+    - link "Read more"
+  - img "global"
+  - text: Powered by
+  - img "provider"
+  - button "Language":
+    - img "language_flag"
+  - button "Theme"
+  - heading "Enter Pin Code" [level=5]
+  - paragraph: Please enter your pin code
+  - spinbutton
+  - spinbutton
+  - spinbutton
+  - spinbutton
+  - spinbutton
+  - spinbutton
+  - paragraph:
+    - text: For any questions, reach out to us at
+    - link "hello@equix.app"
+    - text: anytime!
+```
+
+# Test source
+
+```ts
+   1 | import { test, expect } from '@playwright/test';
+   2 | import { TestData } from '../../lib/constants/TestData';
+   3 | import PageFactory from '../../lib/pages/PageFactory';
+   4 |
+   5 |
+   6 | test.describe('Login Functionality', () => {
+   7 |     let loginPage;
+   8 |     let pageFactory;
+   9 |
+   10 |     test.beforeEach(async ({ page }) => {
+   11 |         pageFactory = new PageFactory(page);
+   12 |         // Lấy LoginPage từ PageFactory
+   13 |         loginPage = pageFactory.getLoginPage();
+   14 |         await loginPage.open('https://portal-tradeforgood-dev2.equix.app');
+   15 |     });
+   16 |
+   17 |     test('should login successfully with valid credentials', async ({ page }) => {
+   18 |         await loginPage.login(TestData.Users.ValidUser.email, TestData.Users.ValidUser.password);
+   19 |
+   20 |         await page.waitForTimeout(1000); 
+   21 |
+   22 |         // Verify login button is enabled
+>  23 |         expect(await loginPage.isLoginButtonDisabled()).toBeFalsy();
+      |                                                         ^ Error: expect(received).toBeFalsy()
+   24 |
+   25 |         // Kiểm tra đã chuyển hướng đến trang nhập PIN
+   26 |         await expect(page.locator('body')).toContainText('Enter Pin Code');
+   27 |
+   28 |         await loginPage.enterCode(TestData.Users.ValidUser.code);
+   29 |
+   30 |         await expect(page.locator('body')).toContainText('Dashboard');
+   31 |     });
+   32 |
+   33 |     test('should show error message with invalid credentials', async ({ page }) => {
+   34 |         await loginPage.login(TestData.Users.InvalidUser.email, TestData.Users.InvalidUser.password);
+   35 |
+   36 |         // Kiểm tra toast thông báo lỗi hiển thị
+   37 |         expect(await loginPage.isToastDisplayed()).toBeTruthy();
+   38 |
+   39 |         // Kiểm tra nội dung của toast message
+   40 |         expect(await loginPage.isToastMessageCorrect('Error, Incorrect Password or User Login. Please make sure your details are correct and try again')).toBeTruthy();
+   41 |
+   42 |         await loginPage.dismissToast();
+   43 |
+   44 |         expect(await loginPage.isToastGone()).toBeTruthy();
+   45 |
+   46 |         await loginPage.clickLoginButton();
+   47 |
+   48 |         expect(await loginPage.isToastDisplayed()).toBeTruthy();
+   49 |
+   50 |         expect(await loginPage.isToastMessageCorrect('Error, You have tried too many times. Please try again later.')).toBeTruthy();
+   51 |
+   52 |         await loginPage.dismissToast();
+   53 |
+   54 |         // Kiểm tra nội dung toast message đã bị xóa
+   55 |         expect(await loginPage.isToastGone()).toBeTruthy();
+   56 |     });
+   57 |
+   58 |     test('login button should be disabled when both email and password are empty', async ({ page }) => {
+   59 |         // Verify login button is disabled
+   60 |         expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+   61 |     });
+   62 |
+   63 |
+   64 |     test('login button should be disabled when email is empty', async ({ page }) => {
+   65 |         // Enter only password
+   66 |         await loginPage.enterPassword(TestData.Users.ValidUser.password);
+   67 |
+   68 |         // Verify login button is still disabled
+   69 |         expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+   70 |
+   71 |         await loginPage.focusEmailField();
+   72 |
+   73 |         await loginPage.blurEmailField();
+   74 |
+   75 |         // Verify error message for email is displayed (if your form shows errors before submission)
+   76 |         expect(await loginPage.isErrorMessageDisplayed('Email is required')).toBeTruthy();
+   77 |     });
+   78 |
+   79 |     test('login button should be disabled when password is empty', async ({ page }) => {
+   80 |         // Enter only email
+   81 |         await loginPage.enterEmail(TestData.Users.ValidUser.email);
+   82 |
+   83 |         // Verify login button is still disabled
+   84 |         expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+   85 |
+   86 |         await loginPage.focusPasswordField();
+   87 |
+   88 |         await loginPage.blurPasswordField();
+   89 |
+   90 |         // Verify error message for password is displayed (if your form shows errors before submission)
+   91 |         expect(await loginPage.isErrorMessageDisplayed('Password is required')).toBeTruthy();
+   92 |     });
+   93 |
+   94 |     test('login button should be disabled when email format is invalid', async ({ page }) => {
+   95 |         // Enter invalid email format and valid password
+   96 |         await loginPage.enterEmail((TestData.Users.InvalidUser.invalidFormatEmail));
+   97 |         await loginPage.enterPassword(TestData.Users.ValidUser.password);
+   98 |
+   99 |         // Verify login button is disabled
+  100 |         expect(await loginPage.isLoginButtonDisabled()).toBeTruthy();
+  101 |
+  102 |         // Verify error message for invalid email is displayed
+  103 |         expect(await loginPage.isErrorMessageDisplayed('Email is invalid')).toBeTruthy();
+  104 |     });
+  105 |
+  106 | });
+  107 |
+  108 |
+```

@@ -1,0 +1,9 @@
+[2025-04-06T18:30:05.940Z] [ERROR] Lỗi khi kiểm tra element hiển thị: //*[@id[contains(., "helper-text")] and contains(text(), "Password is required")]
+page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('//*[@id[contains(., "helper-text")] and contains(text(), "Password is required")]') to be visible
+
+    at WaitHelper.waitForElementToBeVisible (E:\Playwright\lib\utils\WaitHelper.js:21:29)
+    at LoginPage.isElementVisible (E:\Playwright\lib\core\BasePage.js:85:35)
+    at LoginPage.isErrorMessageDisplayed (E:\Playwright\lib\pages\LoginPage.js:83:27)
+    at E:\Playwright\tests\login\Login.spec.js:89:32

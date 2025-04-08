@@ -1,0 +1,46 @@
+Lỗi khi điều hướng đến https://portal-tradeforgood-dev2.equix.app/: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://portal-tradeforgood-dev2.equix.app/", waiting until "networkidle"
+
+Lỗi trong quá trình setup: page.evaluate: Execution context was destroyed, most likely because of a navigation
+    at BaseTest.setup (E:\Playwright\lib\core\BaseTest.js:81:29)
+    at Object.baseTest (E:\Playwright\lib\core\BaseTest.js:125:9) {
+  name: 'Error',
+  [Symbol(step)]: {
+    stepId: 'pw:api@7',
+    location: {
+      file: 'E:\\Playwright\\lib\\core\\BaseTest.js',
+      line: 81,
+      column: 29,
+      function: 'BaseTest.setup'
+    },
+    category: 'pw:api',
+    title: 'page.evaluate',
+    apiName: 'page.evaluate',
+    params: {
+      expression: '() => {\n' +
+        '        window.moveTo(0, 0);\n' +
+        '        window.resizeTo(screen.width, screen.height);\n' +
+        '      }',
+      isFunction: true,
+      arg: [Object]
+    },
+    boxedStack: undefined,
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [TestInfoImpl],
+      _stepId: 'pw:api@7'
+    },
+    complete: [Function: complete],
+    endWallTime: 1743363165865,
+    error: {
+      message: 'Error: page.evaluate: Execution context was destroyed, most likely because of a navigation',
+      stack: 'Error: page.evaluate: Execution context was destroyed, most likely because of a navigation\n' +
+        '    at BaseTest.setup (E:\\Playwright\\lib\\core\\BaseTest.js:81:29)\n' +
+        '    at Object.baseTest (E:\\Playwright\\lib\\core\\BaseTest.js:125:9)',
+      cause: undefined
+    }
+  }
+}

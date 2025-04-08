@@ -1,0 +1,11 @@
+Lỗi khi điều hướng đến undefined: page.goto is not a function
+[2025-03-30T19:48:58.520Z] [ERROR] Lỗi khi điền text vào input: input[name="email"]
+page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('input[name="email"]') to be visible
+
+    at WaitHelper.waitForElementToBeVisible (E:\Playwright\lib\utils\WaitHelper.js:27:29)
+    at LoginPage.setText (E:\Playwright\lib\core\BasePage.js:304:35)
+    at LoginPage.enterEmail (E:\Playwright\lib\pages\LoginPage.js:37:20)
+    at LoginPage.login (E:\Playwright\lib\pages\LoginPage.js:50:20)
+    at E:\Playwright\tests\login\Login.spec.js:25:25

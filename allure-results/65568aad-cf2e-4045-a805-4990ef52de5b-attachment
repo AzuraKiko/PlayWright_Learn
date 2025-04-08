@@ -1,0 +1,157 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Login Functionality >> should show error message with invalid credentials
+- Location: E:\Playwright\tests\login\Login.spec.js:40:5
+
+# Error details
+
+```
+TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('input[name="email"]') to be visible
+
+    at WaitHelper.waitForElementToBeVisible (E:\Playwright\lib\utils\WaitHelper.js:27:29)
+    at LoginPage.setText (E:\Playwright\lib\core\BasePage.js:304:35)
+    at LoginPage.enterEmail (E:\Playwright\lib\pages\LoginPage.js:37:20)
+    at LoginPage.login (E:\Playwright\lib\pages\LoginPage.js:50:20)
+    at E:\Playwright\tests\login\Login.spec.js:41:25
+```
+
+# Test source
+
+```ts
+   1 | /**
+   2 |  * Helper class for handling waits in page interactions
+   3 |  */
+   4 | class WaitHelper {
+   5 |     constructor(page) {
+   6 |         this.page = page;
+   7 |         this.defaultTimeout = 30000; // Default timeout in milliseconds
+   8 |     }
+   9 |
+   10 |     /**
+   11 |      * Wait for an element to be visible
+   12 |      * @param {string} selector - XPath or CSS selector
+   13 |      * @param {Object} options - Options for waiting
+   14 |      * @returns {Promise<ElementHandle>} - Element handle
+   15 |      */
+   16 |     async waitForElementToBeVisible(selector, options = {}) {
+   17 |         const timeout = options.timeout || this.defaultTimeout;
+   18 |         const isXPath = selector.startsWith('//') || selector.startsWith('(//');
+   19 |
+   20 |         if (isXPath) {
+   21 |             await this.page.waitForSelector(`xpath=${selector}`, {
+   22 |                 state: 'visible',
+   23 |                 timeout
+   24 |             });
+   25 |             return await this.page.$(`xpath=${selector}`);
+   26 |         } else {
+>  27 |             await this.page.waitForSelector(selector, {
+      |                             ^ TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.
+   28 |                 state: 'visible',
+   29 |                 timeout
+   30 |             });
+   31 |             return await this.page.$(selector);
+   32 |         }
+   33 |     }
+   34 |
+   35 |     /**
+   36 |      * Wait for an element to be hidden
+   37 |      * @param {string} selector - XPath or CSS selector
+   38 |      * @param {Object} options - Options for waiting
+   39 |      */
+   40 |     async waitForElementToBeHidden(selector, options = {}) {
+   41 |         const timeout = options.timeout || this.defaultTimeout;
+   42 |         const isXPath = selector.startsWith('//') || selector.startsWith('(//');
+   43 |
+   44 |         if (isXPath) {
+   45 |             await this.page.waitForSelector(`xpath=${selector}`, {
+   46 |                 state: 'hidden',
+   47 |                 timeout
+   48 |             });
+   49 |         } else {
+   50 |             await this.page.waitForSelector(selector, {
+   51 |                 state: 'hidden',
+   52 |                 timeout
+   53 |             });
+   54 |         }
+   55 |     }
+   56 |
+   57 |     /**
+   58 |      * Wait for an element to be enabled
+   59 |      * @param {string} selector - XPath or CSS selector
+   60 |      * @param {Object} options - Options for waiting
+   61 |      * @returns {Promise<ElementHandle>} - Element handle
+   62 |      */
+   63 |     async waitForEnabled(selector, options = {}) {
+   64 |         const timeout = options.timeout || this.defaultTimeout;
+   65 |         const element = await this.waitForVisible(selector, { timeout });
+   66 |
+   67 |         await this.page.waitForFunction(
+   68 |             el => !el.disabled,
+   69 |             element,
+   70 |             { timeout }
+   71 |         );
+   72 |
+   73 |         return element;
+   74 |     }
+   75 |
+   76 |     /**
+   77 |      * Wait for a specific text to appear in the element
+   78 |      * @param {string} selector - XPath or CSS selector
+   79 |      * @param {string} text - Text to wait for
+   80 |      * @param {Object} options - Options for waiting
+   81 |      * @returns {Promise<ElementHandle>} - Element handle
+   82 |      */
+   83 |     async waitForText(selector, text, options = {}) {
+   84 |         const timeout = options.timeout || this.defaultTimeout;
+   85 |         const element = await this.waitForVisible(selector, { timeout });
+   86 |
+   87 |         await this.page.waitForFunction(
+   88 |             (el, expectedText) => el.textContent.includes(expectedText),
+   89 |             element,
+   90 |             text,
+   91 |             { timeout }
+   92 |         );
+   93 |
+   94 |         return element;
+   95 |     }
+   96 |
+   97 |     /**
+   98 |      * Wait for a network request to complete
+   99 |      * @param {string} urlPattern - URL pattern to match
+  100 |      * @param {Object} options - Options for waiting
+  101 |      */
+  102 |     async waitForRequest(urlPattern, options = {}) {
+  103 |         const timeout = options.timeout || this.defaultTimeout;
+  104 |         await this.page.waitForRequest(
+  105 |             request => request.url().match(urlPattern),
+  106 |             { timeout }
+  107 |         );
+  108 |     }
+  109 |
+  110 |     /**
+  111 |      * Wait for a network response to complete
+  112 |      * @param {string} urlPattern - URL pattern to match
+  113 |      * @param {Object} options - Options for waiting
+  114 |      */
+  115 |     async waitForResponse(urlPattern, options = {}) {
+  116 |         const timeout = options.timeout || this.defaultTimeout;
+  117 |         await this.page.waitForResponse(
+  118 |             response => response.url().match(urlPattern),
+  119 |             { timeout }
+  120 |         );
+  121 |     }
+  122 |
+  123 |     /**
+  124 |      * Wait for page navigation to complete
+  125 |      * @param {Object} options - Options for waiting
+  126 |      */
+  127 |     async waitForNavigation(options = {}) {
+```

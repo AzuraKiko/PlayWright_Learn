@@ -1,0 +1,1 @@
+Setup: Mở trình duyệt chromium và vào trang https://portal-tradeforgood-dev2.equix.app/

@@ -1,0 +1,134 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Login Functionality >> should show error message with invalid credentials
+- Location: E:\Playwright\tests\login\Login.spec.js:28:5
+
+# Error details
+
+```
+Error: expect(received).toBeTruthy()
+
+Received: false
+    at E:\Playwright\tests\login\Login.spec.js:35:155
+```
+
+# Page snapshot
+
+```yaml
+- main:
+  - heading "Trade for Good" [level=3]
+  - paragraph: Financial Companies Empowered Through Technology
+  - button "Read more":
+    - link "Read more"
+  - img "global"
+  - text: Powered by
+  - img "provider"
+  - button "Language":
+    - img "language_flag"
+  - button "Theme"
+  - heading "Hello!" [level=5]
+  - paragraph: Please login to your account
+  - text: Email
+  - textbox "Email": minh123@novus-fintech.com
+  - text: Password
+  - textbox "Password": invalid123
+  - button "toggle password visibility"
+  - paragraph
+  - button "900s" [disabled]
+  - paragraph:
+    - text: For any questions, reach out to us at
+    - link "hello@equix.app"
+    - text: anytime!
+- alert:
+  - paragraph: Error
+  - paragraph: You have tried too many times. Please try again later.
+  - button "Dismiss"
+```
+
+# Test source
+
+```ts
+   1 | import { test, expect } from '@playwright/test';
+   2 | import { TestData } from '../../lib/constants/TestData';
+   3 | import PageFactory from '../../lib/pages/PageFactory';
+   4 |
+   5 |
+   6 | test.describe('Login Functionality', () => {
+   7 |     let loginPage;
+   8 |     let pageFactory;
+   9 |
+  10 |     test.beforeEach(async ({ page }) => {
+  11 |         pageFactory = new PageFactory(page);
+  12 |         // Lấy LoginPage từ PageFactory
+  13 |         loginPage = pageFactory.getLoginPage();
+  14 |         await loginPage.open('https://portal-tradeforgood-dev2.equix.app');
+  15 |     });
+  16 |
+  17 |     test('should login successfully with valid credentials', async ({ page }) => {
+  18 |         await loginPage.login(TestData.Users.ValidUser.email, TestData.Users.ValidUser.password);
+  19 |
+  20 |         // Kiểm tra đã chuyển hướng đến trang nhập PIN
+  21 |         await expect(page.locator('body')).toContainText('Enter Pin Code');
+  22 |
+  23 |         await loginPage.enterCode(TestData.Users.ValidUser.code);
+  24 |
+  25 |         await expect(page.locator('body')).toContainText('Dashboard');
+  26 |     });
+  27 |
+  28 |     test('should show error message with invalid credentials', async ({ page }) => {
+  29 |         await loginPage.login(TestData.Users.InvalidUser.email, TestData.Users.InvalidUser.password);
+  30 |
+  31 |         // Kiểm tra toast thông báo lỗi hiển thị
+  32 |         expect(await loginPage.isToastDisplayed()).toBeTruthy();
+  33 |
+  34 |         // Kiểm tra nội dung của toast message
+> 35 |         expect(await loginPage.isToastMessageCorrect('Error, Incorrect Password or User Login. Please make sure your details are correct and try again')).toBeTruthy();
+     |                                                                                                                                                           ^ Error: expect(received).toBeTruthy()
+  36 |
+  37 |         await loginPage.dismissToast();
+  38 |         // Kiểm tra nội dung toast message đã bị xóa
+  39 |         expect(await loginPage.isToastDisplayed()).toBeFalsy();
+  40 |     });
+  41 |
+  42 | });
+  43 |
+  44 |
+  45 | //     test('Đăng nhập thất bại khi không nhập tên đăng nhập', async ({ baseTest }) => {
+  46 |
+  47 | //         // Lấy LoginPage từ PageFactory
+  48 | //         const loginPage = pageFactory.getPage('login');
+  49 |
+  50 | //         // Đăng nhập với tên đăng nhập trống
+  51 | //         await loginPage.login('', TestData.Users.StandardUser.password);
+  52 |
+  53 | //         // Kiểm tra thông báo lỗi hiển thị
+  54 | //         expect(await loginPage.isErrorMessageVisible()).toBeTruthy();
+  55 |
+  56 | //         // Kiểm tra nội dung thông báo lỗi
+  57 | //         const errorMessage = await loginPage.getErrorMessage();
+  58 | //         expect(errorMessage).toContain(TestData.ErrorMessages.EmptyUsername);
+  59 | //     });
+  60 |
+  61 | //     test('Đăng nhập thất bại khi không nhập mật khẩu', async ({ baseTest }) => {
+  62 | //         const { pageFactory } = baseTest;
+  63 |
+  64 | //         // Lấy LoginPage từ PageFactory
+  65 | //         const loginPage = pageFactory.getPage('login');
+  66 |
+  67 | //         // Đăng nhập với mật khẩu trống
+  68 | //         await loginPage.login(TestData.Users.StandardUser.username, '');
+  69 |
+  70 | //         // Kiểm tra thông báo lỗi hiển thị
+  71 | //         expect(await loginPage.isErrorMessageVisible()).toBeTruthy();
+  72 |
+  73 | //         // Kiểm tra nội dung thông báo lỗi
+  74 | //         const errorMessage = await loginPage.getErrorMessage();
+  75 | //         expect(errorMessage).toContain(TestData.ErrorMessages.EmptyPassword);
+  76 | //     });
+```

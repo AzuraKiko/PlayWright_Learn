@@ -1,0 +1,6 @@
+[2025-03-30T19:59:44.475Z] [ERROR] Lỗi khi điền text vào input: input[name="email"]
+page.fill: value: expected string, got undefined
+    at LoginPage.setText (E:\Playwright\lib\core\BasePage.js:327:29)
+    at LoginPage.enterEmail (E:\Playwright\lib\pages\LoginPage.js:37:9)
+    at LoginPage.login (E:\Playwright\lib\pages\LoginPage.js:50:9)
+    at E:\Playwright\tests\login\Login.spec.js:36:9

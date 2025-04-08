@@ -1,0 +1,75 @@
+Error scrolling to element //div[@role="alert"]//button[contains(text(), "Dismiss")]: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '//div[@role="alert"]//button[contains(text(), "Dismiss")]' is not a valid selector.
+    at eval (eval at evaluate (:234:30), <anonymous>:7:34)
+    at UtilityScript.evaluate (<anonymous>:236:17)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at LoginPage.scrollToElementByJS (E:\Playwright\lib\core\BasePage.js:126:48)
+    at LoginPage.scrollToElement (E:\Playwright\lib\core\BasePage.js:168:36)
+    at LoginPage.click (E:\Playwright\lib\core\BasePage.js:304:13)
+    at LoginPage.dismissToast (E:\Playwright\lib\pages\LoginPage.js:80:13)
+    at E:\Playwright\tests\login\Login.spec.js:44:9 {
+  [Symbol(step)]: {
+    stepId: 'pw:api@52',
+    location: {
+      file: 'E:\\Playwright\\lib\\core\\BasePage.js',
+      line: 126,
+      column: 48,
+      function: 'LoginPage.scrollToElementByJS'
+    },
+    category: 'pw:api',
+    title: 'page.evaluate',
+    apiName: 'page.evaluate',
+    params: {
+      expression: '({\n' +
+        '        selector,\n' +
+        '        behavior,\n' +
+        '        block,\n' +
+        '        inline\n' +
+        '      }) => {\n' +
+        '        const element = document.querySelector(selector);\n' +
+        '        if (!element) return false;\n' +
+        '        element.scrollIntoView({\n' +
+        '          behavior,\n' +
+        '          block,\n' +
+        '          inline\n' +
+        '        });\n' +
+        '        return true;\n' +
+        '      }',
+      isFunction: true,
+      arg: [Object]
+    },
+    boxedStack: undefined,
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [TestInfoImpl],
+      _stepId: 'pw:api@52'
+    },
+    complete: [Function: complete],
+    endWallTime: 1743366760062,
+    error: {
+      message: `Error: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '//div[@role="alert"]//button[contains(text(), "Dismiss")]' is not a valid selector.\n` +
+        '    at eval (eval at evaluate (:234:30), <anonymous>:7:34)\n' +
+        '    at UtilityScript.evaluate (<anonymous>:236:17)\n' +
+        '    at UtilityScript.<anonymous> (<anonymous>:1:44)',
+      stack: `Error: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '//div[@role="alert"]//button[contains(text(), "Dismiss")]' is not a valid selector.\n` +
+        '    at eval (eval at evaluate (:234:30), <anonymous>:7:34)\n' +
+        '    at UtilityScript.evaluate (<anonymous>:236:17)\n' +
+        '    at UtilityScript.<anonymous> (<anonymous>:1:44)\n' +
+        '    at eval (eval at evaluate (:234:30), <anonymous>:7:34)\n' +
+        '    at UtilityScript.evaluate (<anonymous>:236:17)\n' +
+        '    at UtilityScript.<anonymous> (<anonymous>:1:44)\n' +
+        '    at LoginPage.scrollToElementByJS (E:\\Playwright\\lib\\core\\BasePage.js:126:48)\n' +
+        '    at LoginPage.scrollToElement (E:\\Playwright\\lib\\core\\BasePage.js:168:36)\n' +
+        '    at LoginPage.click (E:\\Playwright\\lib\\core\\BasePage.js:304:13)\n' +
+        '    at LoginPage.dismissToast (E:\\Playwright\\lib\\pages\\LoginPage.js:80:13)\n' +
+        '    at E:\\Playwright\\tests\\login\\Login.spec.js:44:9',
+      cause: undefined
+    }
+  }
+}
+Failed to scroll to element //div[@role="alert"]//button[contains(text(), "Dismiss")]: locator.scrollIntoViewIfNeeded: selector: expected string, got object
+    at LoginPage.scrollToElement (E:\Playwright\lib\core\BasePage.js:178:27)
+    at LoginPage.click (E:\Playwright\lib\core\BasePage.js:304:13)
+    at LoginPage.dismissToast (E:\Playwright\lib\pages\LoginPage.js:80:13)
+    at E:\Playwright\tests\login\Login.spec.js:44:9

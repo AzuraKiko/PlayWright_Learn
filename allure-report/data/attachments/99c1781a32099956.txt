@@ -1,0 +1,82 @@
+Error scrolling to element //input[@data-id="0"]: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '//input[@data-id="0"]' is not a valid selector.
+    at eval (eval at evaluate (:234:30), <anonymous>:7:34)
+    at UtilityScript.evaluate (<anonymous>:236:17)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at LoginPage.scrollToElementByJS (E:\Playwright\lib\core\BasePage.js:126:48)
+    at LoginPage.scrollToElement (E:\Playwright\lib\core\BasePage.js:168:36)
+    at LoginPage.setText (E:\Playwright\lib\core\BasePage.js:306:13)
+    at LoginPage.enterCode (E:\Playwright\lib\pages\LoginPage.js:90:13)
+    at E:\Playwright\tests\login\Login.spec.js:30:9 {
+  [Symbol(step)]: {
+    stepId: 'pw:api@44',
+    location: {
+      file: 'E:\\Playwright\\lib\\core\\BasePage.js',
+      line: 126,
+      column: 48,
+      function: 'LoginPage.scrollToElementByJS'
+    },
+    category: 'pw:api',
+    title: 'page.evaluate',
+    apiName: 'page.evaluate',
+    params: {
+      expression: '({\n' +
+        '        selector,\n' +
+        '        behavior,\n' +
+        '        block,\n' +
+        '        inline\n' +
+        '      }) => {\n' +
+        '        const element = document.querySelector(selector);\n' +
+        '        if (!element) return false;\n' +
+        '        element.scrollIntoView({\n' +
+        '          behavior,\n' +
+        '          block,\n' +
+        '          inline\n' +
+        '        });\n' +
+        '        return true;\n' +
+        '      }',
+      isFunction: true,
+      arg: [Object]
+    },
+    boxedStack: undefined,
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [TestInfoImpl],
+      _stepId: 'pw:api@44'
+    },
+    complete: [Function: complete],
+    endWallTime: 1743364416063,
+    error: {
+      message: `Error: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '//input[@data-id="0"]' is not a valid selector.\n` +
+        '    at eval (eval at evaluate (:234:30), <anonymous>:7:34)\n' +
+        '    at UtilityScript.evaluate (<anonymous>:236:17)\n' +
+        '    at UtilityScript.<anonymous> (<anonymous>:1:44)',
+      stack: `Error: page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '//input[@data-id="0"]' is not a valid selector.\n` +
+        '    at eval (eval at evaluate (:234:30), <anonymous>:7:34)\n' +
+        '    at UtilityScript.evaluate (<anonymous>:236:17)\n' +
+        '    at UtilityScript.<anonymous> (<anonymous>:1:44)\n' +
+        '    at eval (eval at evaluate (:234:30), <anonymous>:7:34)\n' +
+        '    at UtilityScript.evaluate (<anonymous>:236:17)\n' +
+        '    at UtilityScript.<anonymous> (<anonymous>:1:44)\n' +
+        '    at LoginPage.scrollToElementByJS (E:\\Playwright\\lib\\core\\BasePage.js:126:48)\n' +
+        '    at LoginPage.scrollToElement (E:\\Playwright\\lib\\core\\BasePage.js:168:36)\n' +
+        '    at LoginPage.setText (E:\\Playwright\\lib\\core\\BasePage.js:306:13)\n' +
+        '    at LoginPage.enterCode (E:\\Playwright\\lib\\pages\\LoginPage.js:90:13)\n' +
+        '    at E:\\Playwright\\tests\\login\\Login.spec.js:30:9',
+      cause: undefined
+    }
+  }
+}
+[2025-03-30T19:53:36.225Z] [ERROR] Lỗi khi điền text vào input: //input[@data-id="0"]
+page.waitForFunction: SyntaxError: Failed to execute 'querySelector' on 'Document': '//input[@data-id="0"]' is not a valid selector.
+    at eval (eval at predicate (eval at evaluate (:234:30)), <anonymous>:2:32)
+    at predicate (eval at evaluate (:234:30), <anonymous>:13:24)
+    at next (eval at evaluate (:234:30), <anonymous>:32:31)
+    at eval (eval at evaluate (:234:30), <anonymous>:42:11)
+    at UtilityScript.evaluate (<anonymous>:236:17)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at LoginPage.waitForElementClickable (E:\Playwright\lib\core\BasePage.js:247:25)
+    at LoginPage.setText (E:\Playwright\lib\core\BasePage.js:307:13)
+    at LoginPage.enterCode (E:\Playwright\lib\pages\LoginPage.js:90:13)
+    at E:\Playwright\tests\login\Login.spec.js:30:9
