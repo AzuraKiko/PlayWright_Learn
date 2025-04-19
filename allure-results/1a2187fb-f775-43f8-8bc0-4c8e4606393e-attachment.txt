@@ -1,0 +1,10 @@
+Lỗi khi điều hướng đến https://portal-tradeforgood-dev2.equix.app/login: page.goto: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://portal-tradeforgood-dev2.equix.app/login", waiting until "networkidle"
+
+[2025-04-19T04:09:10.689Z] [ERROR] Lỗi khi điền text vào input: input[name="email"]
+page.waitForSelector: Target page, context or browser has been closed
+    at WaitHelper.waitForElementToBeVisible (E:\Playwright\lib\utils\WaitHelper.js:27:29)
+    at LoginPage.setText (E:\Playwright\lib\core\BasePage.js:424:35)
+    at LoginPage.enterEmail (E:\Playwright\lib\pages\LoginPage.js:58:20)
+    at E:\Playwright\tests\login\Login.spec.js:84:25

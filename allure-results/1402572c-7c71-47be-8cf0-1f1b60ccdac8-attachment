@@ -1,0 +1,236 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Login Functionality >> should show error message with invalid credentials
+- Location: E:\Playwright\tests\login\Login.spec.js:36:5
+
+# Error details
+
+```
+Error: locator.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator('//div[@role="alert"]//button[contains(text(), "Dismiss")]')
+    - locator resolved to <button tabindex="0" type="button" class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-iseyuj">…</button>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+    - element is not stable
+  - retrying click action
+    - waiting for element to be visible, enabled and stable
+  - element was detached from the DOM, retrying
+
+    at LoginPage.click (E:\Playwright\lib\core\BasePage.js:402:27)
+    at LoginPage.dismissToast (E:\Playwright\lib\pages\LoginPage.js:106:9)
+    at E:\Playwright\tests\login\Login.spec.js:55:9
+```
+
+# Test source
+
+```ts
+  302 |     /**
+  303 |      * Cuộn đến tất cả các phần tử khớp với locator
+  304 |      * @param {string} selector - XPath hoặc CSS selector
+  305 |      * @param {Object} options - Tùy chọn bổ sung
+  306 |      * @returns {Promise<void>}
+  307 |      */
+  308 |     async scrollToAllElements(selector, options = {}) {
+  309 |         const { behavior = "smooth", block = "center", delay = 300 } = options;
+  310 |
+  311 |         // Lấy tất cả các phần tử
+  312 |         const locator = this.getLocator(selector);
+  313 |         const count = await locator.count();
+  314 |
+  315 |         // Cuộn đến từng phần tử
+  316 |         for (let i = 0; i < count; i++) {
+  317 |             const element = locator.nth(i);
+  318 |             await element.scrollIntoViewIfNeeded();
+  319 |             await this.page.waitForTimeout(delay);
+  320 |         }
+  321 |     }
+  322 |
+  323 |     /**
+  324 |      * Đợi cho đến khi phần tử có thể click được
+  325 |      * @param {string} selector - CSS hoặc XPath selector của phần tử
+  326 |      * @param {number} timeout - Thời gian chờ tối đa (ms)
+  327 |      * @returns {Promise<void>}
+  328 |      */
+  329 |     async waitForElementClickable(selector, timeout = 10000) {
+  330 |         const locator = this.getLocator(selector);
+  331 |
+  332 |         // Đợi phần tử xuất hiện trong DOM
+  333 |         await locator.waitFor({ state: "attached", timeout });
+  334 |
+  335 |         // Đợi phần tử hiển thị
+  336 |         await locator.waitFor({ state: "visible", timeout });
+  337 |
+  338 |         // Đợi phần tử có thể tương tác (không bị disabled)
+  339 |         const isXPathSelector = this.isXPath(selector);
+  340 |
+  341 |         if (isXPathSelector) {
+  342 |             const xpathSelector = selector.startsWith("xpath=")
+  343 |                 ? selector.substring(6)
+  344 |                 : selector;
+  345 |
+  346 |             await this.page.waitForFunction(
+  347 |                 ([xpath]) => {
+  348 |                     const result = document.evaluate(
+  349 |                         xpath,
+  350 |                         document,
+  351 |                         null,
+  352 |                         XPathResult.FIRST_ORDERED_NODE_TYPE,
+  353 |                         null
+  354 |                     );
+  355 |                     const element = result.singleNodeValue;
+  356 |                     return (
+  357 |                         element &&
+  358 |                         !element.disabled &&
+  359 |                         getComputedStyle(element).pointerEvents !== "none"
+  360 |                     );
+  361 |                 },
+  362 |                 [xpathSelector],
+  363 |                 { timeout }
+  364 |             );
+  365 |         } else {
+  366 |             await this.page.waitForFunction(
+  367 |                 ([cssSelector]) => {
+  368 |                     const element = document.querySelector(cssSelector);
+  369 |                     return (
+  370 |                         element &&
+  371 |                         !element.disabled &&
+  372 |                         getComputedStyle(element).pointerEvents !== "none"
+  373 |                     );
+  374 |                 },
+  375 |                 [selector],
+  376 |                 { timeout }
+  377 |             );
+  378 |         }
+  379 |     }
+  380 |
+  381 |     /**
+  382 |      * Click vào phần tử với khả năng tùy chỉnh cuộn và chờ đợi
+  383 |      * @param {string} selector - CSS hoặc XPath selector của phần tử
+  384 |      * @param {Object} options - Tùy chọn bổ sung
+  385 |      * @param {Object} options.scrollOptions - Tùy chọn cho scrollToElement
+  386 |      * @param {Object} options.clickOptions - Tùy chọn cho page.click
+  387 |      * @param {number} options.timeout - Thời gian chờ tối đa cho phần tử có thể click (ms)
+  388 |      * @returns {Promise<void>}
+  389 |      */
+  390 |     async click(selector, options = {}) {
+  391 |         const { scrollOptions = {}, clickOptions = {}, timeout = 10000 } = options;
+  392 |         try {
+  393 |             await this.waitHelper.waitForElementToBeVisible(selector);
+  394 |             // Cuộn đến phần tử với các tùy chọn được cung cấp
+  395 |             await this.scrollToElement(selector, scrollOptions);
+  396 |
+  397 |             // Đợi phần tử có thể click
+  398 |             await this.waitForElementClickable(selector, timeout);
+  399 |
+  400 |             // Click vào phần tử với các tùy chọn được cung cấp
+  401 |             const locator = this.getLocator(selector);
+> 402 |             await locator.click(clickOptions);
+      |                           ^ Error: locator.click: Target page, context or browser has been closed
+  403 |         } catch (error) {
+  404 |             logger.error(`Lỗi khi nhấp vào element: ${selector}`, error);
+  405 |             throw error;
+  406 |         }
+  407 |     }
+  408 |
+  409 |     /**
+  410 |      * Điền văn bản vào phần tử
+  411 |      * @param {string} selector - CSS hoặc XPath selector của phần tử
+  412 |      * @param {string} text - Văn bản cần điền vào phần tử
+  413 |      * @param {Object} options - Tùy chọn bổ sung
+  414 |      * @returns {Promise<boolean>} - true nếu đã điền, false nếu đã bỏ qua
+  415 |      */
+  416 |     async setText(selector, text, options = {}) {
+  417 |         const {
+  418 |             clearFirst = false,
+  419 |             skipIfNotEmpty = true,
+  420 |             timeout = 10000,
+  421 |         } = options;
+  422 |
+  423 |         try {
+  424 |             await this.waitHelper.waitForElementToBeVisible(selector);
+  425 |
+  426 |             // Cuộn đến phần tử và đợi nó có thể tương tác
+  427 |             await this.scrollToElement(selector);
+  428 |             await this.waitForElementClickable(selector, timeout);
+  429 |
+  430 |             const locator = this.getLocator(selector);
+  431 |
+  432 |             // Kiểm tra nếu cần bỏ qua
+  433 |             if (skipIfNotEmpty) {
+  434 |                 const isXPathSelector = this.isXPath(selector);
+  435 |                 let currentValue;
+  436 |
+  437 |                 if (isXPathSelector) {
+  438 |                     // Sử dụng evaluateHandle cho XPath
+  439 |                     const handle = await this.page.evaluateHandle((xpath) => {
+  440 |                         const result = document.evaluate(
+  441 |                             xpath,
+  442 |                             document,
+  443 |                             null,
+  444 |                             XPathResult.FIRST_ORDERED_NODE_TYPE,
+  445 |                             null
+  446 |                         );
+  447 |                         const element = result.singleNodeValue;
+  448 |                         return element ? element.value || element.textContent || "" : "";
+  449 |                     }, selector.replace(/^xpath=/, ""));
+  450 |                     currentValue = await handle.jsonValue();
+  451 |                     await handle.dispose();
+  452 |                 } else {
+  453 |                     // Sử dụng evaluate cho CSS selector
+  454 |                     currentValue = await this.page.evaluate((cssSelector) => {
+  455 |                         const el = document.querySelector(cssSelector);
+  456 |                         return el ? el.value || el.textContent || "" : "";
+  457 |                     }, selector);
+  458 |                 }
+  459 |
+  460 |                 if (currentValue.trim() !== "") {
+  461 |                     return false; // Đã bỏ qua
+  462 |                 }
+  463 |             }
+  464 |
+  465 |             // Xóa nội dung nếu cần
+  466 |             if (clearFirst) {
+  467 |                 await locator.fill("");
+  468 |             }
+  469 |
+  470 |             // Điền văn bản
+  471 |             await locator.fill(text);
+  472 |             return true; // Đã điền
+  473 |         } catch (error) {
+  474 |             logger.error(`Lỗi khi điền text vào input: ${selector}`, error);
+  475 |             throw error;
+  476 |         }
+  477 |     }
+  478 |
+  479 |     /**
+  480 |      * Điền văn bản vào trường input có xử lý sự kiện JavaScript
+  481 |      * @param {string} selector - CSS hoặc XPath selector của phần tử
+  482 |      * @param {string} text - Văn bản cần điền vào phần tử
+  483 |      * @returns {Promise<void>}
+  484 |      */
+  485 |     async setTextWithEvents(selector, text, options = {}) {
+  486 |         const { timeout = 10000 } = options;
+  487 |
+  488 |         await this.waitHelper.waitForElementToBeVisible(selector);
+  489 |         await this.scrollToElement(selector, options.scrollOptions || {});
+  490 |         await this.waitForElementClickable(selector, timeout);
+  491 |
+  492 |         const isXPathSelector = this.isXPath(selector);
+  493 |
+  494 |         // Sử dụng JavaScript để thiết lập giá trị và kích hoạt sự kiện
+  495 |         await this.page.evaluate(
+  496 |             ({ selector, text, isXPath }) => {
+  497 |                 let element;
+  498 |
+  499 |                 if (isXPath) {
+  500 |                     const result = document.evaluate(
+  501 |                         selector,
+  502 |                         document,
+```

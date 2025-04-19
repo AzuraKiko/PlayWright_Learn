@@ -18,7 +18,7 @@ test.describe('Login Functionality', () => {
     });
 
     // Teardown after each test
-    test.afterEach(async () => {
+    test.afterEach(async ({ page }) => {
         await page.close();
     });
 

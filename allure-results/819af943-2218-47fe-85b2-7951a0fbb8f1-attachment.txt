@@ -1,0 +1,15 @@
+[2025-04-19T04:09:02.290Z] [ERROR] Lỗi khi nhấp vào element: //div[@role="alert"]//button[contains(text(), "Dismiss")]
+locator.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator('//div[@role="alert"]//button[contains(text(), "Dismiss")]')
+    - locator resolved to <button tabindex="0" type="button" class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-iseyuj">…</button>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+    - element is not stable
+  - retrying click action
+    - waiting for element to be visible, enabled and stable
+  - element was detached from the DOM, retrying
+
+    at LoginPage.click (E:\Playwright\lib\core\BasePage.js:402:27)
+    at LoginPage.dismissToast (E:\Playwright\lib\pages\LoginPage.js:106:9)
+    at E:\Playwright\tests\login\Login.spec.js:55:9
