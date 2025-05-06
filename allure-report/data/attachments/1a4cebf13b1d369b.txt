@@ -1,1 +1,0 @@
-Lỗi khi điều hướng đến undefined: page.goto is not a function

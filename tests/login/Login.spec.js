@@ -7,7 +7,7 @@ test.describe('Login Functionality', () => {
     let loginPage;
     let pageFactory;
 
-    test.beforeEach(async ({ page },) => {
+    test.beforeEach(async ({ page }) => {
         // Access the baseURL directly from the config
         const baseURL = config.use?.baseURL;
 

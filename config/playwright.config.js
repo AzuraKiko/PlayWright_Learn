@@ -10,14 +10,19 @@ export default defineConfig({
         baseURL: 'https://portal-tradeforgood-dev2.equix.app', //URL cơ sở cho tất cả các test. Khi bạn sử dụng page.goto('/products'), nó sẽ điều hướng đến https://www.demoblaze.com/products.
         trace: 'on-first-retry', //Cấu hình khi nào Playwright nên thu thập trace (dấu vết) để debug. 'on-first-retry' có nghĩa là trace chỉ được thu thập khi test thất bại và được chạy lại lần đầu tiên. Trace bao gồm ảnh chụp màn hình, DOM, network requests, v.v.
         screenshot: 'only-on-failure',
-        video: 'on-first-retry',
+        video: 'on', // Chỉ quay video khi fail và retry lần đầu
+        // Các options khác:
+        // 'on-first-retry', - Chỉ quay video khi fail và retry lần đầu
+        // 'off' - Tắt hoàn toàn
+        // 'on' - Luôn quay video
+        // 'retain-on-failure' - Quay mọi test nhưng chỉ giữ lại nếu fail
     },
     projects: [
         {
             name: 'Chrome',
             use: {
                 browserName: 'chromium',
-                headless: true, //false nghĩa là trình duyệt sẽ hiển thị UI (có thể nhìn thấy), true sẽ chạy ẩn
+                headless: false, //false nghĩa là trình duyệt sẽ hiển thị UI (có thể nhìn thấy), true sẽ chạy ẩn
                 viewport: null, //null nghĩa là sử dụng kích thước cửa sổ trình duyệt mặc định thay vì kích thước cố định
                 launchOptions: {
                     slowMo: 100, //Làm chậm tất cả các thao tác của Playwright (tính bằng mili giây) để dễ theo dõi. Ở đây là 100ms.

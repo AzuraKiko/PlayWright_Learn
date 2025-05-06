@@ -1,28 +1,30 @@
 import { test, expect } from '@playwright/test';
-import Sidebar from '../pages/Sidebar';
-import LoginPage from '../pages/LoginPage';
-import { testConfig } from '../config/testConfig';
+import PageFactory from '../../lib/pages/PageFactory';
+import config from '../../config/playwright.config.js';
+import { TestData } from '../../lib/constants/TestData';
 
 test.describe('Sidebar Navigation Tests', () => {
-    let page;
+    let pageFactory;
     let sidebar;
     let loginPage;
 
-    test.beforeEach(async ({ browser }) => {
-        // Create a new page for each test
-        page = await browser.newPage();
-        sidebar = new Sidebar(page);
-        loginPage = new LoginPage(page);
+    test.beforeEach(async ({ page }) => {
+        // Access the baseURL directly from the config
+        const baseURL = config.use?.baseURL;
 
-        // Login before each test
-        await page.goto(testConfig.baseUrl);
-        await loginPage.login(testConfig.validUser.username, testConfig.validUser.password);
+        pageFactory = new PageFactory(page);
+        // Lấy LoginPage từ PageFactory
+        loginPage = pageFactory.getLoginPage();
+        await loginPage.open(baseURL);
+        await loginPage.login(TestData.Users.ValidUser.email, TestData.Users.ValidUser.password);
+        await loginPage.enterCode(TestData.Users.ValidUser.code);
 
-        // Wait for dashboard to load
-        await page.waitForSelector('text=Dashboard', { state: 'visible' });
+        // Lấy DashboardPage từ PageFactory
+        sidebar = pageFactory.getSidebar();
     });
 
-    test.afterEach(async () => {
+    // Teardown after each test
+    test.afterEach(async ({ page }) => {
         await page.close();
     });
 
@@ -31,30 +33,67 @@ test.describe('Sidebar Navigation Tests', () => {
         expect(isVisible).toBeTruthy();
     });
 
-    test('should toggle sidebar', async () => {
+    test('collapse and expand sidebar', async ({ page }) => {
+        await page.waitForSelector('div.MuiDrawer-root.MuiDrawer-docked');
         // Get initial width
         const initialWidth = await page.$eval(sidebar.sidebar, el => el.offsetWidth);
 
         // Toggle sidebar
-        await sidebar.toggleSidebar();
+        await sidebar.clickToggleSidebar();
         await page.waitForTimeout(500); // Wait for animation
 
         // Get new width
         const newWidth = await page.$eval(sidebar.sidebar, el => el.offsetWidth);
 
         // Width should be different after toggle
-        expect(newWidth).not.toEqual(initialWidth);
+        expect(newWidth).toBeLessThan(initialWidth);
     });
 
-    test('should navigate to Dashboard', async () => {
-        await sidebar.navigateToDashboard();
-        await expect(page).toHaveURL(/.*dashboard/);
-    });
+    // Helper function to test navigation to tabs instead of URL changes
+    const testTabNavigation = (testName, navigationFunction, expectedTabText) => {
+        test(testName, async () => {
+            await navigationFunction();
 
-    test('should navigate to Notifications', async () => {
-        await sidebar.navigateToNotifications();
-        await expect(page).toHaveURL(/.*notifications/);
-    });
+            // Wait for the tab to appear
+            await page.waitForSelector(`[role="tab"]:has-text("${expectedTabText}")`, { state: 'visible', timeout: 5000 });
+
+            // Verify the tab is active/selected
+            const isTabActive = await page.evaluate((tabText) => {
+                const tabs = document.querySelectorAll('[role="tab"]');
+                const targetTab = Array.from(tabs).find(tab => tab.textContent.includes(tabText));
+                return targetTab && (targetTab.getAttribute('aria-selected') === 'true' ||
+                    targetTab.classList.contains('active') ||
+                    targetTab.classList.contains('Mui-selected'));
+            }, expectedTabText);
+
+            expect(isTabActive).toBe(true);
+
+            // Additionally check if tab content is visible
+            const isTabContentVisible = await page.evaluate((tabText) => {
+                // This needs to be adapted to your specific app structure
+                const tabPanels = document.querySelectorAll('[role="tabpanel"]');
+                return tabPanels.length > 0 && Array.from(tabPanels).some(panel => panel.style.display !== 'none');
+            });
+
+            expect(isTabContentVisible).toBe(true);
+        });
+    };
+
+    // Navigation tests using the helper function for tab-based UI
+    testTabNavigation('should navigate to Dashboard', () => sidebar.navigateToDashboard(), 'Dashboard');
+    testTabNavigation('should navigate to Notifications', () => sidebar.navigateToNotifications(), 'Notifications');
+    testTabNavigation('should navigate to All Users', () => sidebar.navigateToAllUsers(), 'All Users');
+    testTabNavigation('should navigate to All Segments', () => sidebar.navigateToAllSegments(), 'All Segments');
+    testTabNavigation('should navigate to Roles Management', () => sidebar.navigateToRolesManagement(), 'Roles Management');
+    testTabNavigation('should navigate to Account Management', () => sidebar.navigateToAccountManagement(), 'Account Management');
+    testTabNavigation('should navigate to Vetting Rules Management', () => sidebar.navigateToVettingRulesManagement(), 'Vetting Rules Management');
+    testTabNavigation('should navigate to Market Data Management', () => sidebar.navigateToMarketDataManagement(), 'Market Data Management');
+    testTabNavigation('should navigate to All Holdings', () => sidebar.navigateToAllHoldings(), 'All Holdings');
+    testTabNavigation('should navigate to All Orders', () => sidebar.navigateToAllOrders(), 'All Orders');
+    testTabNavigation('should navigate to Research Reports', () => sidebar.navigateToResearchReports(), 'Research Reports');
+    testTabNavigation('should navigate to Stock Recommendations', () => sidebar.navigateToStockRecommendations(), 'Stock Recommendations');
+    testTabNavigation('should navigate to Pending Client Management', () => sidebar.navigateToPendingClientManagement(), 'Pending Client Management');
+
 
     test('should expand and collapse User Management', async () => {
         // Expand User Management
@@ -72,61 +111,6 @@ test.describe('Sidebar Navigation Tests', () => {
         expect(allUsersHidden).toBeFalsy();
     });
 
-    test('should navigate to All Users', async () => {
-        await sidebar.navigateToAllUsers();
-        await expect(page).toHaveURL(/.*users/);
-    });
-
-    test('should navigate to All Segments', async () => {
-        await sidebar.navigateToAllSegments();
-        await expect(page).toHaveURL(/.*segments/);
-    });
-
-    test('should navigate to Roles Management', async () => {
-        await sidebar.navigateToRolesManagement();
-        await expect(page).toHaveURL(/.*roles/);
-    });
-
-    test('should navigate to Account Management', async () => {
-        await sidebar.navigateToAccountManagement();
-        await expect(page).toHaveURL(/.*account-management/);
-    });
-
-    test('should navigate to Vetting Rules Management', async () => {
-        await sidebar.navigateToVettingRulesManagement();
-        await expect(page).toHaveURL(/.*vetting-rules/);
-    });
-
-    test('should navigate to Market Data Management', async () => {
-        await sidebar.navigateToMarketDataManagement();
-        await expect(page).toHaveURL(/.*market-data/);
-    });
-
-    test('should navigate to All Holdings', async () => {
-        await sidebar.navigateToAllHoldings();
-        await expect(page).toHaveURL(/.*holdings/);
-    });
-
-    test('should navigate to All Orders', async () => {
-        await sidebar.navigateToAllOrders();
-        await expect(page).toHaveURL(/.*orders/);
-    });
-
-    test('should navigate to Research Reports', async () => {
-        await sidebar.navigateToResearchReports();
-        await expect(page).toHaveURL(/.*research-reports/);
-    });
-
-    test('should navigate to Stock Recommendations', async () => {
-        await sidebar.navigateToStockRecommendations();
-        await expect(page).toHaveURL(/.*stock-recommendations/);
-    });
-
-    test('should navigate to Pending Client Management', async () => {
-        await sidebar.navigateToPendingClientManagement();
-        await expect(page).toHaveURL(/.*pending-clients/);
-    });
-
     test('should open Equix website in new tab when clicking logo', async () => {
         // Create a promise that resolves when a new page is created
         const pagePromise = page.context().waitForEvent('page');
@@ -136,7 +120,7 @@ test.describe('Sidebar Navigation Tests', () => {
 
         // Wait for the new page
         const newPage = await pagePromise;
-        await newPage.waitForLoadState();
+        await newPage.waitForLoadState('networkidle');
 
         // Check the URL of the new page
         expect(newPage.url()).toContain('equix.com.au');

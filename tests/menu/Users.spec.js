@@ -9,7 +9,7 @@ test.describe('Users Page Tests', () => {
     let usersPage;
 
     // Đăng nhập trước mỗi test case
-    test.beforeEach(async ({ page },) => {
+    test.beforeEach(async ({ page }) => {
         // Access the baseURL directly from the config
         const baseURL = config.use?.baseURL;
 
@@ -18,7 +18,7 @@ test.describe('Users Page Tests', () => {
         // Lấy LoginPage từ PageFactory
         loginPage = pageFactory.getLoginPage();
         await loginPage.open(baseURL);
-        await loginPage.login(TestData.Users.StandardUser.email, TestData.Users.StandardUser.password);
+        await loginPage.login(TestData.Users.ValidUser.email, TestData.Users.ValidUser.password);
         await loginPage.enterCode(TestData.Users.ValidUser.code);
 
         // Lấy DashboardPage từ PageFactory
