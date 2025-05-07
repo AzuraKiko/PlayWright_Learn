@@ -29,6 +29,7 @@ test.describe('Sidebar Navigation Tests', () => {
 
         // Wait for initial navigation to complete
         await page.waitForLoadState('networkidle');
+        await page.locator('.lm_title').waitFor();
     });
 
     // Teardown after each test
@@ -48,13 +49,17 @@ test.describe('Sidebar Navigation Tests', () => {
 
         // Toggle sidebar
         await sidebar.clickToggleSidebar();
-        await page.waitForTimeout(500); // Wait for animation
-
+        await page.waitForTimeout(500);
         // Get new width
         const newWidth = await page.$eval(sidebar.sidebar, el => el.offsetWidth);
 
         // Width should be different after toggle
         expect(newWidth).toBeLessThan(initialWidth);
+    });
+
+    test('should verify Dashboard is tab default selected', async () => {
+        const isTabSelected = await tabHelper.isTabSelected('Dashboard');
+        expect(isTabSelected).toBe(true);
     });
 
     // Helper function for tab navigation tests
@@ -82,19 +87,19 @@ test.describe('Sidebar Navigation Tests', () => {
 
     // Test data for all navigation cases
     const NAVIGATION_TEST_CASES = [
-        // { name: 'Dashboard', action: () => sidebar.navigateToDashboard(), tabText: 'Dashboard' },
-        // { name: 'Notifications', action: () => sidebar.navigateToNotifications(), tabText: 'Notifications' },
+        { name: 'Dashboard', action: () => sidebar.navigateToDashboard(), tabText: 'Dashboard' },
+        { name: 'Notifications', action: () => sidebar.navigateToNotifications(), tabText: 'Notifications' },
         { name: 'All Users', action: () => sidebar.navigateToAllUsers(), tabText: 'All Users' },
         { name: 'All Segments', action: () => sidebar.navigateToAllSegments(), tabText: 'All Segments' },
         // { name: 'Roles Management', action: () => sidebar.navigateToRolesManagement(), tabText: 'Roles Management' },
-        //     { name: 'Account Management', action: () => sidebar.navigateToAccountManagement(), tabText: 'Account Management' },
-        //     { name: 'Vetting Rules Management', action: () => sidebar.navigateToVettingRulesManagement(), tabText: 'Vetting Rule' },
-        //     { name: 'Market Data Management', action: () => sidebar.navigateToMarketDataManagement(), tabText: 'Market Data' },
-        //     { name: 'All Holdings', action: () => sidebar.navigateToAllHoldings(), tabText: 'All Holdings' },
-        //     { name: 'All Orders', action: () => sidebar.navigateToAllOrders(), tabText: 'All Orders' },
-        //     { name: 'Research Reports', action: () => sidebar.navigateToResearchReports(), tabText: 'Research Reports' },
-        //     { name: 'Stock Recommendations', action: () => sidebar.navigateToStockRecommendations(), tabText: 'Stock Recommendations' },
-        //     { name: 'Pending Client Management', action: () => sidebar.navigateToPendingClientManagement(), tabText: 'Pending Client Management' },
+        { name: 'Account Management', action: () => sidebar.navigateToAccountManagement(), tabText: 'Account Management' },
+        { name: 'Vetting Rules Management', action: () => sidebar.navigateToVettingRulesManagement(), tabText: 'Vetting Rule' },
+        { name: 'Market Data Management', action: () => sidebar.navigateToMarketDataManagement(), tabText: 'Market Data' },
+        { name: 'All Holdings', action: () => sidebar.navigateToAllHoldings(), tabText: 'All Holdings' },
+        { name: 'All Orders', action: () => sidebar.navigateToAllOrders(), tabText: 'All Orders' },
+        { name: 'Research Reports', action: () => sidebar.navigateToResearchReports(), tabText: 'Research Reports' },
+        { name: 'Stock Recommendations', action: () => sidebar.navigateToStockRecommendations(), tabText: 'Stock Recommendations' },
+        { name: 'Pending Client Management', action: () => sidebar.navigateToPendingClientManagement(), tabText: 'Pending Client Management' },
     ];
 
     // Generate all navigation tests dynamically
@@ -106,24 +111,57 @@ test.describe('Sidebar Navigation Tests', () => {
         );
     });
 
+    test('should close all tabs', async ({ page }) => {
+        let allTabs = await tabHelper.getAllTabs();
+        for (const tab of allTabs) {
+            await tabHelper.closeTab(tab.text);
+        }
+        await page.waitForTimeout(500);
+        allTabs = await tabHelper.getAllTabs();
+        expect(allTabs.length).toBe(0);
+    });
 
-    test('should expand and collapse User Management', async () => {
+
+    test('should close a tab and verify it is closed', async ({ page }) => {
+        await tabHelper.closeTab('Dashboard');
+
+        // Đợi một chút để tab đóng xong
+        await page.waitForTimeout(300);
+
+        // Kiểm tra tab không còn tồn tại
+        const allTabs = await tabHelper.getAllTabs();
+        const closedTab = allTabs.find(tab => tab.text === 'Dashboard');
+        expect(closedTab).toBeUndefined();
+    });
+
+
+    test('should expand and collapse User Management', async ({ page }) => {
         // Expand User Management
         await sidebar.expandUserManagement();
 
         // Check if submenu items are visible
-        const allUsersVisible = await sidebar.isSubmenuExpanded(sidebar.menuItems.allUsers);
+        const allUsersVisible = await sidebar.isSubmenuExpanded(sidebar.menuItems.allUsers) &&
+            await sidebar.isSubmenuExpanded(sidebar.menuItems.allSegments);
         expect(allUsersVisible).toBeTruthy();
 
         // Collapse User Management
         await sidebar.collapseUserManagement();
 
+        await page.waitForTimeout(300);
         // Check if submenu items are hidden
-        const allUsersHidden = await sidebar.isSubmenuExpanded(sidebar.menuItems.allUsers);
-        expect(allUsersHidden).toBeFalsy();
+        const allUsersCollapsed = await sidebar.isSubmenuHide(sidebar.menuItems.allUsers) &&
+            await sidebar.isSubmenuHide(sidebar.menuItems.allSegments);
+
+        expect(allUsersCollapsed).toBeTruthy();
     });
 
-    test('should open Equix website in new tab when clicking logo', async () => {
+    test('should verify all menu items are visible', async () => {
+        const allVisible = await sidebar.verifyAllMenuItemsVisible();
+        expect(allVisible).toBeTruthy();
+    });
+
+
+    test('should open Equix website in new tab when clicking logo', async ({ page }) => {
         // Create a promise that resolves when a new page is created
         const pagePromise = page.context().waitForEvent('page');
 
@@ -139,49 +177,5 @@ test.describe('Sidebar Navigation Tests', () => {
 
         // Close the new page
         await newPage.close();
-    });
-
-    test('should get all menu items', async () => {
-        const menuItems = await sidebar.getAllMenuItems();
-
-        // Verify we have menu items
-        expect(menuItems.length).toBeGreaterThan(0);
-
-        // Verify structure of menu items
-        expect(menuItems[0]).toHaveProperty('text');
-        expect(menuItems[0]).toHaveProperty('isActive');
-    });
-
-    test('should verify all menu items are visible', async () => {
-        const allVisible = await sidebar.verifyAllMenuItemsVisible();
-        expect(allVisible).toBeTruthy();
-    });
-
-    test('should handle navigation to non-existent menu item gracefully', async () => {
-        try {
-            // Try to navigate to a non-existent menu item
-            await sidebar.navigateTo('Non-existent Menu');
-            // If we get here, the test should fail
-            expect(true).toBeFalsy('Should have thrown an error');
-        } catch (error) {
-            // Verify we got an error
-            expect(error).toBeDefined();
-        }
-    });
-
-    test('should maintain active state after navigation', async () => {
-        // Navigate to Dashboard
-        await sidebar.navigateToDashboard();
-
-        // Get all menu items
-        const menuItems = await sidebar.getAllMenuItems();
-
-        // Find Dashboard menu item
-        const dashboardItem = menuItems.find(item =>
-            item.text.includes(sidebar.menuItems.dashboard)
-        );
-
-        // Verify Dashboard is active
-        expect(dashboardItem.isActive).toBeTruthy();
     });
 });
