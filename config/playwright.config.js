@@ -7,7 +7,7 @@ export default defineConfig({
         timeout: 5000 //Thời gian tối đa (tính bằng mili giây) cho mỗi assertion (kiểm tra) trong test. Ở đây là 5 giây (5000ms).
     },
     use: {
-        baseURL: 'https://portal-tradeforgood-dev2.equix.app', //URL cơ sở cho tất cả các test. Khi bạn sử dụng page.goto('/products'), nó sẽ điều hướng đến https://www.demoblaze.com/products.
+        baseURL: 'https://portal-tradeforgood-uat.equix.app', //URL cơ sở cho tất cả các test. Khi bạn sử dụng page.goto('/products'), nó sẽ điều hướng đến https://www.demoblaze.com/products.
         trace: 'on-first-retry', //Cấu hình khi nào Playwright nên thu thập trace (dấu vết) để debug. 'on-first-retry' có nghĩa là trace chỉ được thu thập khi test thất bại và được chạy lại lần đầu tiên. Trace bao gồm ảnh chụp màn hình, DOM, network requests, v.v.
         screenshot: 'only-on-failure',
         video: 'on', // Chỉ quay video khi fail và retry lần đầu
