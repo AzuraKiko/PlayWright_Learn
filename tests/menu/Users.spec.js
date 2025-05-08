@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { TestData } from '../../lib/constants/TestData.js';
 import PageFactory from '../../lib/pages/PageFactory.js';
 import config from '../../config/playwright.config.js';
+import TabHelper from '../../lib/components/Tab.js';
 
 test.describe('Users Page Tests', () => {
     let loginPage;
