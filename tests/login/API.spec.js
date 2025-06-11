@@ -71,7 +71,7 @@ test("Login", async ({ request }) => {
             device: "",
             fcmToken: "010C000357",
             lang: "vn"
-        }
+        }``
     });
 
     expect(response.ok).toBeTruthy();
