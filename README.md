@@ -94,3 +94,9 @@ npx playwright show-trace e:/Playwright/test-results/.playwright-artifacts-0/tra
 
 npx allure serve allure-results
 
+npx playwright test tests/login/Login.spec.js --config=config/playwright.config.js --project=Chrome
+
+npm run test:login
+
+npm run test:chrome tests/login/Login.spec.js
+
